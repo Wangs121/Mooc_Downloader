@@ -3,10 +3,10 @@
 ##### 1.  项目简介：
 
 - 项目环境为 Windows10,  Python3
-- 用 Python3.6 urllib3 模块爬虫，所有涉及模块均为标准库，打包后体积小，不到10M
+- 用 Python3.6 urllib3 和requests模块爬虫
 - 支持Mooc视频，字幕，课件下载，课程以目录树形式下载到硬盘，支持Potplayer播放
 - 支持中国大学慕课和爱课程二大慕课网站的视频课程下载，核心下载调用 Aria2c
-- 用户可以直接下载 Release 下的 [学无止下载器-V1.5.3](https://github.com/PyJun/Mooc_Downloader/releases)  安装即可使用
+- 无mp4资源自动下载m3u8格式补充，使用ffmpeg自动转换为mp4
 - 有关下载器的使用以及相关问题，点击查看[Mooc下载器帮助文档](https://github.com/PyJun/Mooc_Downloader/wiki)
 
 ##### 2. 功能演示：
@@ -24,12 +24,12 @@
 - Mooc_Potplayer.py       用于生成专用于 Potplayer 播放的 dpl 文件 
 - Mooc_Request.py          用 urllib 包装的一个Mooc请求库
 - Mooc_Download.py      调用 Aira2c 下载的命令接口
+- m3u8_Download.py      下载m3u8视频
 - Icourses                          有关爱课程的模块包
   - Icourse_Base.py              爱课程下载器的基类，继承自 Mooc_Base
   - Icourse_Config.py            配置文件
   - Icourse_Cuoc.py              爱课程视频公开课的下载的子类，http://www.icourses.cn/cuoc/
   - Icourse_Mooc.py             爱课程资源共享课的下载的子类，http://www.icourses.cn/mooc/
-
 - Icourse163                      有关中国大学慕课的模块包
   - Icourse163_Base.py         中国大学慕课下载器的基类，继承自 Mooc_Base
   - Icourse163_Config.py       配置文件
@@ -57,7 +57,5 @@ python -m Mooc
    pyinstaller Mooc.spec
    ```
 
-3. 最后会在项目工程根目录下出现一个**dist**文件夹，该文件夹会出现一个**Mooc-3.4.0.exe**程序
-
-![package.png](./图片/package.png)
+3. 最后会在项目工程根目录下出现一个**dist**文件夹，该文件夹会出现一个**Mooc-3.5.0_dev.exe**程序
 
