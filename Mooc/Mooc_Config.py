@@ -8,8 +8,8 @@ import re
 
 
 # 常量，固定参数
-__QQgroup__ = "196020837"
-__email__  = "py.jun@qq.com  ze.ga@qq.com"
+__QQgroup__ = "1040710503"
+__email__  = "Wangs121@foxmail.com"
 if hasattr(sys, 'frozen'):
     PATH = os.path.dirname(sys.executable)
 else:
