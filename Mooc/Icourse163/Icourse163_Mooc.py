@@ -4,6 +4,7 @@
 
 import os
 import re
+import requests
 if __package__ is None:
     import sys
     sys.path.append('..\\')
@@ -11,6 +12,7 @@ if __package__ is None:
 from Mooc.Mooc_Config import *
 from Mooc.Mooc_Base import *
 from Mooc.Mooc_Download import *
+from Mooc.m3u8_Download import *
 from Mooc.Mooc_Request import *
 from Mooc.Mooc_Potplayer import *
 from Mooc.Icourse163.Icourse163_Config import * 
@@ -24,6 +26,9 @@ class Icourse163_Mooc(Icourse163_Base):
     course_url = "https://www.icourse163.org/course/"
     infos_url = 'https://www.icourse163.org/dwr/call/plaincall/CourseBean.getMocTermDto.dwr'
     parse_url = 'https://www.icourse163.org/dwr/call/plaincall/CourseBean.getLessonUnitLearnVo.dwr'
+    csrf_url = None
+    m3u8_url_head = 'https://vod.study.163.com/eds/api/v1/vod/video?videoId='
+    
     infos_data = {
         'callCount':'1', 
         'scriptSessionId':'${scriptSessionId}190', 
@@ -40,18 +45,34 @@ class Icourse163_Mooc(Icourse163_Base):
         'scriptSessionId': '${scriptSessionId}190',
         'c0-scriptName':'CourseBean',
         'c0-methodName':'getLessonUnitLearnVo', 
-        'httpSessionId':'5531d06316b34b9486a6891710115ebc',
+        #'httpSessionId':'5531d06316b34b9486a6891710115ebc',
+        'httpSessionId' : None,
         'c0-id': '0', 
         'c0-param0':None, #'number:'+meta[0],
         'c0-param1':None, #'number:'+meta[1], 
+        #'c0-param1':'number:1',
         'c0-param2':'number:0',
         'c0-param3':None, #'number:'+meta[2], 
         'batchId': '1543633161622'
+        #'batchId': '1609820564913'
     }
-
+    
+    m3u8_data = {
+        'bizId' : None,
+        'bizType' : '1',
+        'contentType' : '1'
+        }
+    
     def __init__(self, mode=IS_SHD):
         super().__init__()
         self.mode = mode
+        self.c = requests.session()
+        g = self.c.get(self.course_url)
+        self.csrfToken = g.cookies['NTESSTUDYSI']
+        self.parse_data['httpSessionId'] = self.csrfToken
+        self.csrf_url = 'https://www.icourse163.org/web/j/resourceRpcBean.getResourceToken.rpc?csrfKey=' + self.csrfToken
+        
+        
 
     def _get_cid(self, url):
         self.cid = None
@@ -100,6 +121,7 @@ class Icourse163_Mooc(Icourse163_Base):
         self.parse_data['c0-param0'] = params[0]
         self.parse_data['c0-param1'] = params[1]
         self.parse_data['c0-param3'] = params[2]
+        self.m3u8_data['bizId'] = params[2]
         text = request_post(self.parse_url, self.parse_data, decoding='unicode_escape')
         return text
 
@@ -115,6 +137,7 @@ class Icourse163_Mooc(Icourse163_Base):
         text = self._get_source_text(params)
         sub_match = re.search(r'name=".+";.*url="(.*?)"', text)
         video_url = sub_url = None
+        is_mp4 = True
         if sub_match:
             sub_url = sub_match.group(1)
         resolutions = ['Shd', 'Hd', 'Sd']
@@ -123,7 +146,28 @@ class Icourse163_Mooc(Icourse163_Base):
             if video_match:
                 video_url, _ = video_match.group('url', 'ext')
                 if index >= self.mode: break
-        return video_url, sub_url
+        #无mp4格式
+        if not video_url:
+           is_mp4 = False
+           #print("csrf_url" + self.csrf_url)
+           signiture_raw = self.c.post(self.csrf_url, data = self.m3u8_data)
+           #print("signiture_raw" + signiture_raw.text)
+           signiture = re.search(r'"signature":"(\w+)"', signiture_raw.text).group(1)
+           #print("signiture" + signiture)
+           m3u8_post_url = self.m3u8_url_head + params[0] + '&signature=' + signiture + '&clientType=1'
+           #print("m3u8_post_url" + m3u8_post_url)
+           m3u8_inf0 = self.c.get(m3u8_post_url)
+           #print("m3u8_inf0" + m3u8_inf0.text)
+           video_url_all = re.search(r'"videos":\[(.+)]',m3u8_inf0.text).group(1)
+           #print("video_url_all" + video_url_all)
+           video_urls = re.search(r'"videoUrl":"(?P<Sd>.+?).m3u8?(.*?)"videoUrl":"(?P<Hd>.+?).m3u8',video_url_all)
+           #video_url = video_urls.group(1) + '.m3u8'
+           if self.mode == 3 :
+               video_url = video_urls.group('Sd') + '.m3u8'
+           else:
+               video_url = video_urls.group('Hd') + '.m3u8'
+        return video_url, sub_url, is_mp4
+    
 
     def _download(self):  # 根据课程视频链接来下载高清MP4慕课视频, 成功下载完毕返回 True
         print('\n{:^{}s}'.format(self.title, LEN_S))
@@ -154,9 +198,13 @@ class Icourse163_Mooc(Icourse163_Base):
                 for k,video_source in enumerate(sources['videos'],1):
                     params, name = video_source['params'], video_source['name']
                     video_name = sub_name = name
-                    video_url, sub_url = self._get_video_url(params)
-                    if video_url:
+                    video_url, sub_url, is_mp4 = self._get_video_url(params)
+                    if is_mp4:
+                        #print(video_url)
                         self.download_video(video_url=video_url, video_name=video_name, video_dir=lessonDir)
+                    else:   
+                        print(video_name + " 无mp4资源，正在下载m3u8格式")
+                        M3u8Download(video_url, video_name, lessonDir)
                     if sub_url:
                         self.download_sub(sub_url, sub_name, lessonDir)
 

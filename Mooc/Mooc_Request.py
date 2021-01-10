@@ -30,7 +30,30 @@ def request_decorate(count=3):
             while True:
                 try:
                     return func(*args, **kwargs)
-                except (ContentTooShortError, URLError, HTTPError, ConnectionResetError):
+                except  URLError as e:
+                    print("URLError")
+                    print(e)
+                    cnt += 1
+                    if cnt >= count:
+                        break
+                    sleep(0.32)
+                except  ContentTooShortError as e:
+                    print("ContentTooShortError")
+                    print(e)
+                    cnt += 1
+                    if cnt >= count:
+                        break
+                    sleep(0.32)
+                except  HTTPError as e:
+                    print("HTTPError")
+                    print(e)
+                    cnt += 1
+                    if cnt >= count:
+                        break
+                    sleep(0.32)
+                except  ConnectionResetError as e:
+                    print("ConnectionResetError")
+                    print(e)
                     cnt += 1
                     if cnt >= count:
                         break
@@ -63,7 +86,7 @@ def request_post(url, data, decoding='utf8'):
 @request_decorate()
 def request_head(url):
     '''head请求'''
-    req = request.Request(url=url);
+    req =request.Request(url=url);
     response = request.urlopen(req, timeout=TIMEOUT)
     header =  dict(response.getheaders())
     response.close()

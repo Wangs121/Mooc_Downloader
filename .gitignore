@@ -2,5 +2,6 @@
 Mooc/__pycache__
 Mooc/Icourse163/__pycache__
 Mooc/Icourses/__pycache__
+W_debug/**
 build
 dist
