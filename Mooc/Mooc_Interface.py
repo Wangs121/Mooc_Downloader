@@ -31,7 +31,7 @@ def mooc_interface():
         while True:
             os.system("cls")
             print("\t"+"="*91)
-            print('\t|\t\t      慕课下载器(免费版v3.4.2)      \tQQ群: {:^27s} |'.format(__QQgroup__))
+            print('\t|\t\t      慕课下载器(修复版v3.5.0_dev)      \tQQ群: {:^19s} |'.format(__QQgroup__))
             print("\t|\t\t    icourse163.org, icourses.cn    \t邮箱: {:^27s} |".format(__email__))
             print("\t"+"="*91)
             print("\t{:^90}".format("Github: https://github.com/Wangs121/Mooc_Downloader"))
@@ -89,10 +89,10 @@ def mooc_interface():
                     return
     except KeyboardInterrupt:
         input("程序退出...")
-    finally:
-        if (input("\n小哥哥，小姐姐，打个赏再走呗 …(⊙_⊙)… [y/n]: ") != 'n'):
-            os.startfile(alipay_path)
-        os.system("pause")
+    #finally:
+    #    if (input("\n小哥哥，小姐姐，打个赏再走呗 …(⊙_⊙)… [y/n]: ") != 'n'):
+    #        os.startfile(alipay_path)
+    #    os.system("pause")
 
 def inquire():
     redown = None

@@ -1,12 +1,24 @@
 ### 				基于Python 爬虫的慕课视频下载
 
+#### 修改说明
+
+* 修复了aria2c 错误代码 22
+
+* 无限速
+
+* 修复了不能下载视频的问题
+
+* 增加了无mp4格式视频时下载m3u8格式视频并转换为mp4功能（ffmpeg）
+
+  
+
 ##### 1.  项目简介：
 
 - 项目环境为 Windows10,  Python3
 - 用 Python3.6 urllib3 和requests模块爬虫
 - 支持Mooc视频，字幕，课件下载，课程以目录树形式下载到硬盘，支持Potplayer播放
 - 支持中国大学慕课和爱课程二大慕课网站的视频课程下载，核心下载调用 Aria2c
-- 无mp4资源自动下载m3u8格式补充，使用ffmpeg自动转换为mp4
+- 无mp4资源自动下载m3u8格式补充，使用ffmpeg自动转换为mp4**（增加内容）**
 - 有关下载器的使用以及相关问题，点击查看[Mooc下载器帮助文档](https://github.com/PyJun/Mooc_Downloader/wiki)
 
 ##### 2. 功能演示：
